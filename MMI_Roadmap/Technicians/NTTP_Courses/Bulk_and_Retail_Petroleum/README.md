@@ -28,6 +28,8 @@
 - [ ] Certificate / Schedule A listing filed → `Documents/`
 - [ ] Weights and Measures Act & Regulations → `Reference_Documents/`
 - [ ] Measurement Canada directives V-09, V-16 → `Codebooks/`
+- [x] VCF Table — Diesel, density 840 kg/m³ → `Codebooks/VCF_Diesel_840.pdf`
+- [x] VCF Table — Gasoline, density 730 kg/m³ → `Codebooks/VCF_Gasoline_730.pdf`
 - [ ] Field Inspection Manual — Volumetric Measuring Devices Part 2 → `Study_Materials/`
 - [ ] Course study notes → `Study_Materials/`
 

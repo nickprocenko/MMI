@@ -38,6 +38,8 @@
 - [ ] Updated Schedule A filed → `Documents/`
 - [ ] Measurement Canada Field Inspection Manual (relevant sections) → `Study_Materials/`
 - [ ] Relevant device inspection directives (V-09, V-16) → `Codebooks/`
+- [x] VCF Table — Diesel, density 840 kg/m³ → `Codebooks/VCF_Diesel_840.pdf`
+- [x] VCF Table — Gasoline, density 730 kg/m³ → `Codebooks/VCF_Gasoline_730.pdf`
 - [ ] Field observation notes from evaluation day → `Field_Notes/`
 
 ## Business Milestones
