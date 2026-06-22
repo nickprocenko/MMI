@@ -5,6 +5,7 @@
 **Enables:** Authorization to conduct examinations and issue certificates for device types covered by the Bulk and Retail Petroleum course.
 
 **Status:** `IN PROGRESS`
+**Target Date:** April 2027 (earliest available booking window)
 
 ---
 
@@ -13,6 +14,7 @@
 - [x] Theoretical evaluation passed — File ID 26535-M20 (May 26, 2025)
 - [ ] Contact Kenneth Hinzel's office to request practical evaluation scheduling
 - [ ] Confirm organization's registration status is active with Measurement Canada
+- [ ] Secure booking date in April 2027
 
 ## Practical Evaluation Steps
 

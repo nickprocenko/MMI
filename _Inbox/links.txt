@@ -1,0 +1,4 @@
+# Paste URLs below — one per line
+# Claude will fetch, save, and sort these when you say "process the inbox"
+# Lines starting with # are ignored
+
