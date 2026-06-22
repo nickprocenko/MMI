@@ -13,14 +13,16 @@ Each course folder below contains a modular README with checklists for enrollmen
 ```
 STEP 1 — START NOW (online, self-paced)
 ────────────────────────────────────────────────────────
-  Liquid Fuels Handling Code 2017    $175 + HST
-    → Ontario's legal foundation; also helps prep for MC practical
-
-STEP 2 — SHORT TERM
-────────────────────────────────────────────────────────
   Petroleum Mechanic Helper (PMH)    $449 + HST ($507.37 total)
     → Mandatory gate to PM.1 / PM.2 / PM.3
     → Can replace nozzles, hoses, filters on dispensers independently
+    → No prerequisites — start immediately
+
+STEP 2 — AFTER PMH CERT IS IN HAND
+────────────────────────────────────────────────────────
+  Liquid Fuels Handling Code 2017    $175 + HST
+    → Requires existing TSSA cert # to enroll (PMH qualifies)
+    → Ontario's legal foundation; also helps prep for MC practical
 
 STEP 3 — WHILE WAITING FOR MC PRACTICAL (before April 2027)
 ────────────────────────────────────────────────────────
