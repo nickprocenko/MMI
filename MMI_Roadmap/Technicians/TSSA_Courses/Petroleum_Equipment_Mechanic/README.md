@@ -40,15 +40,31 @@ This folder covers the full Petroleum Mechanic (PM) certification pathway. There
 
 ---
 
-## The 1,000 Hours — Practical Considerations for MMI
+## The 1,000 Hours — Finding a Licensed PM Near Wasaga Beach
 
-MMI currently has no licensed PM on staff. Options to arrange field hours:
+MMI has no licensed PM on staff. You need to arrange field hours with an external company. These are the closest leads:
 
-- **OPCA Member Directory** (opcaonline.org) — petroleum contractors often let trainees work on their sites, sometimes in lieu of wages, to help them log hours
-- **CPCA Members** (cpcaonline.com) — same approach in other provinces
-- Work can be signed off by: a **supervising certificate holder** (PM.1/2/3/4) OR a **company/employer authority**
+### Priority Contacts
 
-> A key early question: Do you know any petroleum equipment contractors locally (Wasaga Beach / Barrie / Collingwood area) who hold a PM cert? That relationship is what unlocks this pathway.
+| Company | Location | Distance | Phone | Notes |
+|---|---|---|---|---|
+| **Comco Canada Ltd.** | 100 Welham Rd, Barrie ON L4N 8Y4 | ~30 min | 705-728-0905 | Founding OPCA/CPCA member, 50+ yrs in petroleum installs — **call first** |
+| **OPCA Head Office** | 387 Mapleview Dr W, Barrie ON L4N 9G4 | ~30 min | 705-735-9437 | Ask them to refer you to a member willing to take on a PMH trainee |
+| **Muskoka Petro-Tech** | Bracebridge, ON | ~1 hr | — | OPCA listed member, tank installation and disposal |
+
+### What to Say When You Call
+
+> "I'm a PMH certificate holder (and Measurement Canada NTTP theoretical cert for Bulk and Retail Petroleum). I'm looking to log my 1,000 PM.1 field hours under a licensed PM. OPCA members often take on trainees — is that something your company does?"
+
+OPCA members frequently accept trainees working in lieu of wages or at reduced pay. Comco Canada is a founding member and the most logical first call given proximity.
+
+### Other Job Board Options
+
+- [Indeed — Petroleum Mechanic Ontario](https://ca.indeed.com/q-petroleum-mechanic-l-ontario-jobs.html)
+- [LinkedIn — Petroleum Technician Canada](https://ca.linkedin.com/jobs/petroleum-technician-jobs)
+- Search keywords: "petroleum equipment technician," "fuel system technician," "PMH" on Indeed/LinkedIn filtered to Barrie/Simcoe
+
+Sign-off can be by: a **supervising PM.1/2/3/4 certificate holder** OR a **company/employer authority**.
 
 ---
 
