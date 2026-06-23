@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MMI — Fuels Certification Roadmap</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      line-height: 1.6;
+    }
+
+    header {
+      background: #1a2332;
+      color: #fff;
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+    }
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    header p {
+      margin-top: 0.5rem;
+      color: #94a3b8;
+      font-size: 1rem;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 4rem;
+    }
+
+    section { margin-bottom: 3rem; }
+
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1a2332;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    /* ── Timeline ── */
+    .timeline { list-style: none; }
+    .timeline li {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      padding: 0.85rem 1rem;
+      background: #fff;
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+    }
+    .timeline .icon { font-size: 1.3rem; flex-shrink: 0; }
+    .timeline .date {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+    .timeline .detail { flex: 1; }
+    .timeline .label {
+      font-weight: 600;
+      color: #1e293b;
+    }
+    .timeline .sub {
+      font-size: 0.875rem;
+      color: #64748b;
+      margin-top: 0.2rem;
+    }
+
+    /* ── Course cards ── */
+    .cards {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 540px) { .cards { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 780px) { .cards { grid-template-columns: repeat(3, 1fr); } }
+
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 1.1rem 1.1rem 1rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .card-authority {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #94a3b8;
+    }
+    .card-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #1a2332;
+      line-height: 1.35;
+    }
+    .card-desc {
+      font-size: 0.825rem;
+      color: #64748b;
+      flex: 1;
+    }
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 0.25rem;
+      gap: 0.5rem;
+    }
+    .card-price {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #334155;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.2em 0.6em;
+      border-radius: 999px;
+    }
+    .badge-done    { background: #dcfce7; color: #166534; }
+    .badge-active  { background: #dbeafe; color: #1e40af; }
+    .badge-next    { background: #fef3c7; color: #92400e; }
+    .badge-pending { background: #f1f5f9; color: #64748b; }
+
+    /* ── Opportunity ── */
+    .opportunity-grid {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 600px) { .opportunity-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .opp-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 1.1rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .opp-card h3 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #1a2332;
+      margin-bottom: 0.4rem;
+    }
+    .opp-card p {
+      font-size: 0.85rem;
+      color: #475569;
+    }
+
+    .highlight-box {
+      background: #1a2332;
+      color: #e2e8f0;
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin-top: 1rem;
+    }
+    .highlight-box p {
+      font-size: 0.925rem;
+      line-height: 1.7;
+    }
+    .highlight-box strong { color: #fff; }
+
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      border-top: 1px solid #e2e8f0;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>MMI Computers Inc.</h1>
+  <p>Fuels Certification Roadmap &mdash; Building a licensed inspection &amp; service business</p>
+</header>
+
+<main>
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 1 — STATUS & TIMELINE
+  ════════════════════════════════════════════ -->
+  <section id="timeline">
+    <h2>Where We Are Right Now</h2>
+    <ul class="timeline">
+
+      <li>
+        <span class="icon">✅</span>
+        <div class="detail">
+          <div class="date">May 2025</div>
+          <div class="label">Measurement Canada — Theoretical Exam PASSED</div>
+          <div class="sub">Bulk &amp; Retail Petroleum (NTTP) &mdash; File ID 26535-M20. Nicholas passed the MC written exam covering fuel meters, dispensers, and inspection procedures.</div>
+        </div>
+      </li>
+
+      <li>
+        <span class="icon">🔵</span>
+        <div class="detail">
+          <div class="date">Now — 2026</div>
+          <div class="label">TSSA Pathway Starting</div>
+          <div class="sub">Next step: enroll in the Petroleum Mechanic Helper (PMH) course at fuelssafety.ca ($507.37). PMH unlocks every TSSA service certification that follows.</div>
+        </div>
+      </li>
+
+      <li>
+        <span class="icon">⏳</span>
+        <div class="detail">
+          <div class="date">April 2027</div>
+          <div class="label">MC Practical Evaluation (target)</div>
+          <div class="sub">Hands-on evaluation with Measurement Canada in Stoney Creek, ON. Passing this adds Nicholas to the MMI Schedule A — authorizing him to officially certify fuel meters in the field.</div>
+        </div>
+      </li>
+
+      <li>
+        <span class="icon">⏳</span>
+        <div class="detail">
+          <div class="date">2027 and beyond</div>
+          <div class="label">Full Service &amp; Inspection Offering</div>
+          <div class="sub">With MC + TSSA certifications in place, MMI can inspect meters AND service/repair fuel systems — a complete single-call solution for Ontario gas stations.</div>
+        </div>
+      </li>
+
+    </ul>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 2 — COURSES & COSTS
+  ════════════════════════════════════════════ -->
+  <section id="courses">
+    <h2>Courses &amp; Costs</h2>
+    <div class="cards">
+
+      <div class="card">
+        <div class="card-authority">Measurement Canada</div>
+        <div class="card-name">Bulk &amp; Retail Petroleum — Theoretical</div>
+        <div class="card-desc">Written exam covering fuel meter inspection, VCF tables, and Weights &amp; Measures Act compliance. Passed May 2025.</div>
+        <div class="card-footer">
+          <span class="card-price">Included in NTTP</span>
+          <span class="badge badge-done">Complete</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-authority">TSSA &mdash; fuelssafety.ca</div>
+        <div class="card-name">Petroleum Mechanic Helper (PMH)</div>
+        <div class="card-desc">Authorizes replacing nozzles, hoses, filters, and belts on dispensers. Mandatory first step for every TSSA mechanic certificate.</div>
+        <div class="card-footer">
+          <span class="card-price">$507.37</span>
+          <span class="badge badge-next">Next Step</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-authority">TSSA &mdash; fuelssafety.ca</div>
+        <div class="card-name">Liquid Fuels Handling Code 2017</div>
+        <div class="card-desc">Ontario's legal code for fuel handling. Covers all 9 sections. Requires a TSSA certificate number to enroll — take after PMH.</div>
+        <div class="card-footer">
+          <span class="card-price">~$198</span>
+          <span class="badge badge-pending">After PMH</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-authority">TSSA &mdash; fuelssafety.ca</div>
+        <div class="card-name">Site Operator — Retail</div>
+        <div class="card-desc">Authorizes legal operation of a retail fuel dispensing site (gas station, cardlock, marina). No prerequisites.</div>
+        <div class="card-footer">
+          <span class="card-price">~$372</span>
+          <span class="badge badge-pending">Not Started</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-authority">TSSA &mdash; OPCA / CPCA</div>
+        <div class="card-name">Petroleum Mechanic PM.1</div>
+        <div class="card-desc">Service &amp; maintain dispensers, suction pumps, submersible pumps. Requires PMH + 1,000 field hours under a licensed PM.</div>
+        <div class="card-footer">
+          <span class="card-price">~$920</span>
+          <span class="badge badge-pending">Not Started</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-authority">Measurement Canada</div>
+        <div class="card-name">Practical Evaluation</div>
+        <div class="card-desc">Hands-on field evaluation at MC Stoney Creek office. Passing this authorizes Nicholas to certify fuel meters and issue exam certificates.</div>
+        <div class="card-footer">
+          <span class="card-price">TBD</span>
+          <span class="badge badge-active">April 2027</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 3 — THE BUSINESS OPPORTUNITY
+  ════════════════════════════════════════════ -->
+  <section id="opportunity">
+    <h2>The Business Opportunity</h2>
+
+    <div class="opportunity-grid">
+
+      <div class="opp-card">
+        <h3>What Measurement Canada certification means</h3>
+        <p>Gas stations are legally required to have every fuel pump inspected and certified by a Measurement Canada–authorized technician. Without a valid certificate, a pump cannot legally dispense fuel for sale. MMI will be authorized to issue those certificates.</p>
+      </div>
+
+      <div class="opp-card">
+        <h3>What TSSA certification means</h3>
+        <p>TSSA certifications authorize MMI to physically service, repair, and replace components on fuel dispensers and underground tank systems — the hands-on work that keeps pumps running between inspections.</p>
+      </div>
+
+      <div class="opp-card">
+        <h3>Why having both is valuable</h3>
+        <p>Right now, most Ontario gas stations hire two separate companies: one to inspect their meters (MC) and one to fix them (TSSA). MMI can be one call for both — simpler for the customer, more revenue per visit for us.</p>
+      </div>
+
+      <div class="opp-card">
+        <h3>The market we're targeting</h3>
+        <p>Ontario has roughly 2,200+ licensed fuel retail outlets. Most are independently owned. Many are underserved in Simcoe County and Muskoka. MMI is based in Wasaga Beach — well-positioned to serve this gap as a local, family-run operation.</p>
+      </div>
+
+    </div>
+
+    <div class="highlight-box">
+      <p>The short version: <strong>Nicholas is building the credentials so MMI can legally walk into any gas station in Ontario and handle the full annual service cycle</strong> — inspect the pumps, certify them for trade, replace worn parts, and keep the site running. That's a recurring-revenue service business built on government-mandated certifications that take years to earn.</p>
+    </div>
+
+  </section>
+
+</main>
+
+<footer>
+  Questions? Talk to Nicholas &mdash; MMI Computers Inc., Wasaga Beach, ON
+</footer>
+
+</body>
+</html>
