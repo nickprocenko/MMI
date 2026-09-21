@@ -8,6 +8,7 @@ This repository tracks MMI's certification program under **Measurement Canada** 
 |---|---|
 | [Admin](Admin/README.md) | MC agreements, Schedule A, client contracts, invoices |
 | [Technicians](Technicians/README.md) | Course checklists, codebooks, study materials, field notes |
+| [Service Providers](Service_Providers/README.md) | Ontario ASPs — competitors, field-hour hosts, subcontract leads |
 
 ## Certification Pathway
 

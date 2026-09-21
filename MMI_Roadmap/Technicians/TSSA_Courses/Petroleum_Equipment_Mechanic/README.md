@@ -66,6 +66,8 @@ OPCA members frequently accept trainees working in lieu of wages or at reduced p
 
 Sign-off can be by: a **supervising PM.1/2/3/4 certificate holder** OR a **company/employer authority**.
 
+> **More leads:** every Measurement Canada authorized service provider in Ontario is a potential field-hours host — most employ licensed PMs. See [Service Providers](../../../Service_Providers/README.md) for the list, contact details, and who to call first.
+
 ---
 
 ## Enrollment (PM.1 — start here)
