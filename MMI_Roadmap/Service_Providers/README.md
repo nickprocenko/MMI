@@ -57,6 +57,10 @@ Verified from company websites and industry directories. **Confirm before callin
 
 ---
 
+> **Also worth calling:** Total Meter Services (Vaughan, ~1.5 hrs) is the only Ontario manufacturer on MC's
+> recognized test equipment list — see [Equipment](../Equipment/README.md). Suppliers who sell to every ASP
+> in the province know who is hiring.
+
 ## OPCA / CPCA Overlap — The Field Hours Angle
 
 Most of these firms are also members of the **Ontario Petroleum Contractors Association** or **CPCA** — the same associations that run the PM.1 course. OPCA members frequently take on PMH-certified trainees.

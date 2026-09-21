@@ -42,6 +42,13 @@
 - [x] VCF Table — Gasoline, density 730 kg/m³ → `Codebooks/VCF_Gasoline_730.pdf`
 - [ ] Field observation notes from evaluation day → `Field_Notes/`
 
+## Equipment
+
+Certification requires MC-**recognized** test equipment, and each unit must be verified and designated as a local standard. See [Equipment](../../Equipment/README.md) for the recognized model list and purchase checklist.
+
+- [ ] Confirm with MC which local standards MMI must own for its Schedule A device types
+- [ ] Recognized 20 L measure/prover purchased and designated as a local standard
+
 ## Business Milestones
 
 - [ ] Authorized to inspect retail fuel dispensers (gasoline/diesel)
