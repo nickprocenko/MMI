@@ -13,7 +13,7 @@ Measurement Canada evaluates and publishes a list of test equipment recognized f
 
 Two separate hurdles, both mandatory:
 
-1. The model must appear on MC's **Recognized Retail Fuel Dispenser Test Equipment** list
+1. The model must appear on MC's [Recognized Retail Fuel Dispenser Test Equipment](https://ised-isde.canada.ca/site/measurement-canada/en/technical-publications/measurement-canada-recognized-retail-fuel-dispenser-test-equipment) list
 2. The individual unit must be **verified and designated as a local standard** by Measurement Canada — see [Directive V-24](https://ised-isde.canada.ca/site/measurement-canada/en/laws-and-requirements/v-24-relevant-local-standards-volume)
 
 > An unrecognized measure is an expensive stainless bucket. Confirm both before any money moves.
@@ -22,7 +22,7 @@ Two separate hurdles, both mandatory:
 
 ## MC Recognized Retail Fuel Dispenser Test Equipment
 
-Transcribed from the Measurement Canada list — **page last modified 2017-02-01**. See the caution at the bottom of this file.
+Transcribed from [Measurement Canada's published list](https://ised-isde.canada.ca/site/measurement-canada/en/technical-publications/measurement-canada-recognized-retail-fuel-dispenser-test-equipment). This is MC's **current** page — it simply has not been revised since its modified date of **2017-02-01**. See the note at the bottom of this file.
 
 ### Seraphin Test Measure Company (Div. of Pemberton Fabricators, Inc.)
 30 Indel Avenue, Rancocas, New Jersey 08073
@@ -150,7 +150,7 @@ Also required alongside the vehicle:
 ## Purchase Checklist
 
 ### Before buying
-- [ ] Confirm with MC that the recognized-equipment list is **current** (published version is dated 2017)
+- [ ] Confirm with MC that nothing has changed since the list's 2017 revision — recognition can lapse or be added off-page
 - [ ] Confirm the exact model MC expects for MMI's Schedule A device types — ask Kenneth Hinzel's office
 - [ ] Confirm the unit can be verified and designated as a local standard under V-24
 - [ ] Quote: Seraphin E-VRTM 20L **+ VRSF or VRLF funnel**
@@ -175,7 +175,7 @@ Also required alongside the vehicle:
 
 ---
 
-> **Caution — source date.** The recognized equipment list transcribed here was published with a modified date of **2017-02-01**. Model lines change and recognition lists get revised. Treat this file as a shopping guide and a record of what to ask about, **not** as the current authority. Verify against Measurement Canada directly before purchasing.
+> **Note — source date.** This is Measurement Canada's current published list; it carries a modified date of **2017-02-01**, meaning MC has not revised the page since then. So the models below are what MC publishes today — but a nine-year-old page is worth a confirming phone call, since a manufacturer can discontinue a model or gain recognition without the page being updated promptly. Verify the specific model with MC before purchasing.
 >
-> Source: Measurement Canada — Recognized Retail Fuel Dispenser Test Equipment.
-> Manufacturer names, addresses, model numbers and descriptions are transcribed from that page.
+> **Source:** [Measurement Canada — Recognized Retail Fuel Dispenser Test Equipment](https://ised-isde.canada.ca/site/measurement-canada/en/technical-publications/measurement-canada-recognized-retail-fuel-dispenser-test-equipment)
+> Manufacturer names, addresses, model numbers and descriptions are transcribed verbatim from that page.
