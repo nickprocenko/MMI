@@ -180,6 +180,42 @@
     }
     .highlight-box strong { color: #fff; }
 
+    /* ── Provider table ── */
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .provider-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      font-size: 0.85rem;
+      min-width: 480px;
+    }
+    .provider-table th {
+      background: #1a2332;
+      color: #fff;
+      text-align: left;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.6rem 0.8rem;
+      white-space: nowrap;
+    }
+    .provider-table td {
+      padding: 0.6rem 0.8rem;
+      border-top: 1px solid #e2e8f0;
+      color: #475569;
+      vertical-align: top;
+    }
+    .provider-table td:first-child { font-weight: 600; color: #1e293b; }
+    .provider-table .dist { white-space: nowrap; color: #64748b; }
+    .note {
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-top: 0.75rem;
+    }
+
     footer {
       text-align: center;
       padding: 2rem 1rem;
@@ -347,6 +383,99 @@
     <div class="highlight-box">
       <p>The short version: <strong>Nicholas is building the credentials so MMI can legally walk into any gas station in Ontario and handle the full annual service cycle</strong> — inspect the pumps, certify them for trade, replace worn parts, and keep the site running. That's a recurring-revenue service business built on government-mandated certifications that take years to earn.</p>
     </div>
+
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 4 — WHO'S ALREADY DOING THIS
+  ════════════════════════════════════════════ -->
+  <section id="providers">
+    <h2>Who's Already Doing This in Ontario</h2>
+
+    <p class="note" style="margin-top:0; margin-bottom:1rem;">
+      Measurement Canada publishes every company authorized to inspect and certify fuel measuring devices.
+      These are the Ontario providers &mdash; MMI's future competitors, and today, its best leads for the
+      1,000 field hours the PM.1 certificate requires.
+    </p>
+
+    <div class="table-wrap">
+      <table class="provider-table">
+        <thead>
+          <tr><th>Company</th><th>City</th><th>From Wasaga Beach</th><th>Focus</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Tanknology (Englobe Corp.)</td><td>Markham</td><td class="dist">~2 hrs</td><td>Tank &amp; line leak testing, dispenser calibration</td></tr>
+          <tr><td>National Energy Equipment Inc.</td><td>Mississauga</td><td class="dist">~1 hr 45</td><td>Equipment supply + meter calibration &amp; re-certification</td></tr>
+          <tr><td>Servicestat Ltd.</td><td>Mississauga</td><td class="dist">~1 hr 45</td><td>Dispenser and pump repair, calibrations, 24/7</td></tr>
+          <tr><td>fuelMeasure Inc.</td><td>Guelph</td><td class="dist">~1 hr 30</td><td>Fuel measurement and dispenser certification</td></tr>
+          <tr><td>Cantest Solutions Inc.</td><td>Toronto</td><td class="dist">~1 hr 45</td><td>Third-party precision testing and certification</td></tr>
+          <tr><td>P.D. McLaren Limited</td><td>Whitby</td><td class="dist">~2 hrs</td><td>Fuelling systems, metering, vehicle wash</td></tr>
+          <tr><td>Albert's Gas Station Maintenance Inc.</td><td>Cambridge</td><td class="dist">~1 hr 45</td><td>Dispenser repair, tank monitoring, W&amp;M inspections</td></tr>
+          <tr><td>Wagg's Petroleum Equipment Limited</td><td>North Bay</td><td class="dist">~3 hrs</td><td>Full liquid hydrocarbon systems, install and service</td></tr>
+          <tr><td>BGIS Energy &amp; Facility Solutions</td><td>Ottawa</td><td class="dist">~5 hrs</td><td>National facility management, corporate portfolios</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="note">Partial list &mdash; captured from the Measurement Canada authorized service provider search. Distances are approximate driving times.</p>
+
+    <div class="highlight-box">
+      <p><strong>Not one authorized provider on this list is based in Simcoe County, Georgian Bay, or Muskoka.</strong>
+      The nearest are roughly an hour and a half away in the GTA; the next is three hours north.
+      Every gas station in Wasaga Beach, Collingwood, Midland and Barrie is being serviced by someone
+      driving in &mdash; which is exactly the gap MMI is being built to fill, and the reason these same
+      companies are worth calling about field hours first.</p>
+    </div>
+
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 5 — EQUIPMENT
+  ════════════════════════════════════════════ -->
+  <section id="equipment">
+    <h2>What We Need to Buy</h2>
+
+    <p class="note" style="margin-top:0; margin-bottom:1rem;">
+      A fuel pump is certified by pumping into a <strong>prover</strong> &mdash; a precision stainless measure
+      of known volume. Measurement Canada publishes the exact models it recognizes, and each individual unit
+      must then be verified and registered to MMI as a legal standard. This is the largest capital cost in
+      the plan after the courses.
+    </p>
+
+    <div class="table-wrap">
+      <table class="provider-table">
+        <thead>
+          <tr><th>Item</th><th>Recognized options</th><th>When</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>20 L prover or test measure</td>
+            <td>Seraphin E-VRTM 20L <em>+ vapour retention funnel</em>, Special J bottom drain prover, or VEP prover (tank-mounted)</td>
+            <td>Before first certification</td>
+          </tr>
+          <tr>
+            <td>Service vehicle</td>
+            <td>Used &frac34;-ton cargo van &mdash; lockable, dry, provers carried upright</td>
+            <td>2027, with Schedule A</td>
+          </tr>
+          <tr>
+            <td>Supporting tools</td>
+            <td>Certified thermometer, hydrometer, security seals, lead-wire crimper, certificate printer</td>
+            <td>Before first certification</td>
+          </tr>
+          <tr>
+            <td>250 L prover</td>
+            <td>Milltown Canadian Drain Prover (34&Prime; diameter)</td>
+            <td>Only if high-flow diesel enters scope</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="note">
+      The vapour retention funnel is part of what Measurement Canada recognizes &mdash; the measure is not
+      approved without it. Equipment that isn't on the recognized list cannot be used to certify anything.
+    </p>
 
   </section>
 
