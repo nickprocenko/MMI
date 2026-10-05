@@ -14,9 +14,15 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # needed to publish releases
     defaults:
       run:
         working-directory: android
+    env:
+      MMI_BUILD_NUMBER: ${{ github.run_number }}
+      # Only pushes to the default branch (or manual runs on it) publish a release.
+      PUBLISH: ${{ github.event_name != 'pull_request' && github.ref_name == github.event.repository.default_branch }}
     steps:
       - uses: actions/checkout@v4
 
@@ -34,3 +40,35 @@ jobs:
         with:
           name: mmi-members-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Decode release key
+        if: env.PUBLISH == 'true'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.MMI_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::warning::MMI_KEYSTORE_BASE64 secret is not set, so no release was published. See android/README.md."
+            exit 0
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/mmi-release.jks"
+          echo "MMI_KEYSTORE_FILE=$RUNNER_TEMP/mmi-release.jks" >> "$GITHUB_ENV"
+
+      - name: Build signed release APK
+        if: env.MMI_KEYSTORE_FILE != ''
+        env:
+          MMI_KEYSTORE_PASSWORD: ${{ secrets.MMI_KEYSTORE_PASSWORD }}
+        run: |
+          ./gradlew assembleRelease --stacktrace
+          cp app/build/outputs/apk/release/app-release.apk "$RUNNER_TEMP/MMI-Members.apk"
+
+      - name: Publish GitHub release
+        if: env.MMI_KEYSTORE_FILE != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="0.1.${MMI_BUILD_NUMBER}"
+          gh release create "app-v${version}" "$RUNNER_TEMP/MMI-Members.apk" \
+            --target "$GITHUB_SHA" \
+            --title "MMI Members ${version}" \
+            --notes "Install on Android: download **MMI-Members.apk** below and open it on the phone. Installs over earlier versions and keeps your data." \
+            --latest
