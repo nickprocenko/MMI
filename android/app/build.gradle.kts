@@ -13,14 +13,31 @@ android {
         applicationId = "com.mmi.members"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        // CI passes its run number so every published build installs as an update.
+        val buildNumber = System.getenv("MMI_BUILD_NUMBER")?.toIntOrNull() ?: 1
+        versionCode = buildNumber
+        versionName = "0.1.$buildNumber"
+    }
+
+    // The release key lives in GitHub secrets, never in the repo. CI decodes it to a file and
+    // points MMI_KEYSTORE_FILE at it; without it, release builds fall back to the debug key.
+    val releaseKeystore = System.getenv("MMI_KEYSTORE_FILE")?.let { file(it) }?.takeIf { it.exists() }
+    signingConfigs {
+        if (releaseKeystore != null) {
+            create("release") {
+                storeFile = releaseKeystore
+                storePassword = System.getenv("MMI_KEYSTORE_PASSWORD")
+                keyAlias = "mmi"
+                keyPassword = System.getenv("MMI_KEYSTORE_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
 

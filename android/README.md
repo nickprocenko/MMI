@@ -25,11 +25,35 @@ track certification goals, and log reports. It ships with built-in profiles for 
 Data is stored locally on the device (`mmi_data.json` in app storage). All storage goes through
 `MmiRepository`, so it can later be replaced by a shared backend so all three members see the same data.
 
-## Getting the APK
+## Installing on a phone
 
-Every push that touches `android/` runs the **Android app** GitHub Actions workflow, which builds a debug APK.
-Open the workflow run on GitHub → **Artifacts** → download `mmi-members-debug-apk`, unzip, and install
-`app-debug.apk` on the phone (allow "install unknown apps" when prompted).
+**Download link (always the newest version):**
+https://github.com/nickprocenko/MMI/releases/latest/download/MMI-Members.apk
+
+Open the link on the phone, tap the downloaded file, and allow installing from your browser when Android
+asks. Play Protect may say the app is unrecognized because it isn't from the Play Store; choose
+**Install anyway**. To update later, open the same link again. The new version installs over the old one and
+keeps your data.
+
+> If you installed a build from the **Actions** page before releases existed, uninstall it once first.
+> Those builds were signed with a different key.
+
+### How releases are made
+
+Every push to the default branch that touches `android/` runs the **Android app** workflow. It builds a
+release APK signed with MMI's key and publishes it as a new GitHub Release (`app-v0.1.<build>`). Builds on
+other branches and PRs only produce a debug APK under the run's **Artifacts**.
+
+The signing key is kept in two repository secrets (Settings → Secrets and variables → Actions):
+
+| Secret | Contents |
+|---|---|
+| `MMI_KEYSTORE_BASE64` | The release keystore (`mmi-release.jks`), base64-encoded |
+| `MMI_KEYSTORE_PASSWORD` | Its password, used for both the store and the `mmi` key |
+
+Keep a backup of the keystore and password somewhere safe, such as a password manager. GitHub secrets
+can't be read back. If the key is lost, future builds can't install as updates, and everyone would have to
+uninstall and reinstall, losing local data. Never commit the keystore; `.gitignore` blocks `*.jks`.
 
 ## Building locally
 
