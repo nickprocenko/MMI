@@ -401,7 +401,7 @@ function homeScreen() {
     </main>`;
 }
 
-const ui = { goalScope: "MINE", showCompleted: true, reportAuthor: null, testScope: "MINE", draftPhase: "AS_FOUND", draftFlow: "FAST" };
+const ui = { goalScope: "MINE", showCompleted: true, reportAuthor: null, testScope: "MINE", draftPhase: "AS_FOUND", draftFlow: "FAST", sopTicks: {} };
 
 function goalsScreen() {
   const me = store.me();
@@ -802,10 +802,10 @@ function testsScreen() {
     .sort((a, b) => b.date.localeCompare(a.date) || (b.createdAt || 0) - (a.createdAt || 0));
   return `${mainBar("Calibration tests")}
     <main class="page">
-      <a class="card row" style="gap:12px" href="#/procedure">
+      <a class="card row" style="gap:12px" href="#/sops">
         <span style="color:var(--primary)">${icon("book")}</span>
-        <span class="grow"><span class="card-title" style="display:block">Test procedure &amp; limits</span>
-        <span class="small muted">FIM Part 2 §1 steps, STPs, limits of error, VCF lookup</span></span>
+        <span class="grow"><span class="card-title" style="display:block">SOPs &amp; test procedures</span>
+        <span class="small muted">${SOPS.length} step-by-step SOPs, limits of error, VCF lookup</span></span>
         ${icon("chevron")}
       </a>
       <div class="row wrap" style="margin-top:14px">
@@ -970,6 +970,7 @@ function atcSection(test) {
   }).join("");
   return `<h2 class="section">ATC test (STP-18)</h2>
     <p class="small muted" style="margin-top:0">Thermometer in the dispenser's test well. Put the register in ATC inspection mode, run at least ${ATC_MIN_VOLUME} L, and read the temperature at 25, 50, 75 and 95 % of the run. Then read the gross and net totals. Pass if net ÷ gross is within the table VCFs for the mean temperature ±1 °C. If you re-run, the latest run counts.</p>
+    <div class="sop-links" style="margin-bottom:8px">${sopLink("atc", "ATC test SOP")}${sopLink("sensor", "Sensor failure SOP")}</div>
     <div>${rows}</div>
     <form class="card" style="margin-top:8px" data-form="atc" data-test="${esc(test.id)}" novalidate>
       <div class="chips" data-single="phase" style="margin-bottom:12px">${Object.entries(PHASES).map(([k, v]) => chip(v, ui.draftPhase === k, `data-value="${k}"`)).join("")}</div>
@@ -990,7 +991,7 @@ function checklistSection(test) {
     <p class="small muted" style="margin-top:0">FIM Part 2 §1 visual examinations and functional tests. Any “Fail” fails the inspection.</p>
     <div>${CHECKS.map(([key, label, ref]) => `
       <div class="check-row">
-        <span class="grow small" style="min-width:0">${esc(label)} <span class="muted">· ${esc(ref)}</span></span>
+        <a class="grow small check-label" style="min-width:0" href="#/sop/${esc(CHECK_SOPS[key])}">${esc(label)} <span class="muted">· ${esc(ref)} ›</span></a>
         <span class="seg">${Object.entries(CHECK_STATES).map(([s, sl]) =>
           `<button type="button" class="seg-btn ${s}" aria-pressed="${test.checks[key] === s}" data-action="set-check" data-test="${esc(test.id)}" data-id="${key}" data-value="${s}">${sl}</button>`).join("")}</span>
       </div>`).join("")}
@@ -1025,6 +1026,7 @@ function testScreen(id) {
       <h2 style="margin:10px 0 4px;font-size:1.35rem">${esc(t.site || "Unnamed site")}${t.nozzle ? ` · Pump ${esc(t.nozzle)}` : ""}</h2>
       <div class="row muted small">${tech ? avatar(tech, 24) : ""}<span>${esc(tech?.name || "")}</span></div>
       ${warnings.length ? `<div class="install-tip" style="margin-top:12px">${warnings.map((w) => `<div>⚠ ${esc(w)}</div>`).join("")}</div>` : ""}
+      <div class="sop-links" style="margin-top:12px">${sopLink("prep", "Pre-inspection")}${sopLink("icepoint", "Ice-point check")}${sopLink("visual", "Visual exam")}${sopLink("close", "Sealing & reporting")}</div>
       <dl class="info">${info.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>
       ${t.notes ? `<p class="small" style="white-space:pre-wrap">${esc(t.notes)}</p>` : ""}
 
@@ -1041,7 +1043,8 @@ function testScreen(id) {
         <p class="small muted" style="margin:0 0 10px">${t.atc ? "Put the register in ATC inspection (gross) mode. " : ""}Wet the measure first and drain ${DRAIN_SECONDS[t.measureVolume] || 20} s after the stream turns to drips (STP-22). Stabilize product temperature within ±0.5 °C.</p>
         <div class="chips" data-single="phase" style="margin-bottom:8px">${Object.entries(PHASES).map(([k, v]) => chip(v, ui.draftPhase === k, `data-value="${k}"`)).join("")}</div>
         <div class="chips" data-single="flow" style="margin-bottom:8px">${Object.entries(FLOWS).map(([k, v]) => chip(v, ui.draftFlow === k, `data-value="${k}"`)).join("")}</div>
-        <p class="small muted" style="margin:0 0 12px">Fast: nozzle fully open, within the max rating (STP-5). Slow: minimum approved flow + 5 L/min${slowRate} (STP-4).</p>
+        <p class="small muted" style="margin:0 0 8px">Fast: nozzle fully open, within the max rating (STP-5). Slow: minimum approved flow + 5 L/min${slowRate} (STP-4).</p>
+        <div class="sop-links">${sopLink("wet", "Wetting")}${sopLink("slow", "Slow flow")}${sopLink("fast", "Fast flow")}${sopLink("shell", "Shell correction")}${sopLink("repeat", "Repeatability")}</div>
         <div class="field-row">
           <label class="field"><span>Gross register (L)</span><input name="indicated" inputmode="decimal" value="${nominal}"></label>
           <label class="field"><span>Measure reads (L)</span><input name="measure" inputmode="decimal" placeholder="${nominal}"></label>
@@ -1185,6 +1188,75 @@ function updateDraftPreview(form) {
   out.innerHTML = `Error <b>${esc(fmtErr(r.errorMl))}</b> ${r.pass ? "✓ within" : "✗ outside"} ±${limitMl(t)} mL · shell ${esc(fmtErr(r.shellMl))}${rateNote}`;
 }
 
+
+// ── SOPs ──────────────────────────────────────────────────────────────────
+
+function sopLink(id, label) {
+  const sop = SOPS.find((x) => x.id === id);
+  return sop ? `<a class="sop-link" href="#/sop/${esc(id)}">${icon("book")}${esc(label || sop.title)}</a>` : "";
+}
+
+function sopIndexScreen() {
+  const groups = SOP_GROUPS.map(([g, label]) => {
+    const items = SOPS.filter((x) => x.group === g).map((x) => `
+      <a class="card row" style="gap:12px;padding:12px 16px" href="#/sop/${esc(x.id)}">
+        <span class="grow" style="min-width:0"><span class="card-title" style="display:block;font-size:0.98rem">${esc(x.title)}</span>
+        <span class="small muted">${esc(x.ref)}</span></span>${icon("chevron")}
+      </a>`).join("");
+    return `<h2 class="section">${esc(label)}</h2><div class="stack">${items}</div>`;
+  }).join("");
+  return `${detailBar("SOPs")}
+    <main class="page no-tabs">
+      <p class="muted" style="margin-top:4px">Step-by-step procedures for inspecting retail fuel dispensers, in the order you'd do them on site. Written from MC's Field Inspection Manual and STPs in MMI's course binder; the official documents govern.</p>
+      <a class="card row" style="gap:12px" href="#/procedure">
+        <span style="color:var(--primary)">${icon("gauge")}</span>
+        <span class="grow"><span class="card-title" style="display:block">Overview, limits &amp; VCF lookup</span>
+        <span class="small muted">The whole inspection on one page</span></span>${icon("chevron")}
+      </a>
+      ${groups}
+    </main>`;
+}
+
+function sopList(title, items, cls = "") {
+  if (!items || !items.length) return "";
+  return `<h2 class="section">${esc(title)}</h2><ul class="sop-list ${cls}">${items.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>`;
+}
+
+function sopScreen(id) {
+  const i = SOPS.findIndex((x) => x.id === id);
+  if (i < 0) return `${detailBar("SOP")}<main class="page no-tabs">${empty("SOP not found.")}</main>`;
+  const sop = SOPS[i];
+  const ticks = ui.sopTicks[sop.id] || [];
+  const prev = SOPS[i - 1], next = SOPS[i + 1];
+  const done = sop.steps.filter((_, n) => ticks.includes(n)).length;
+  return `${detailBar(sop.title)}
+    <main class="page no-tabs procedure">
+      <span class="tag">${esc(SOP_GROUPS.find(([g]) => g === sop.group)[1])}</span>
+      <h2 style="margin:8px 0 2px;font-size:1.35rem">${esc(sop.title)}</h2>
+      <div class="small muted">${esc(sop.ref)}</div>
+      <div class="card" style="margin-top:14px">
+        <div class="small"><b>When:</b> ${esc(sop.when)}</div>
+        <div class="small" style="margin-top:6px"><b>Why:</b> ${esc(sop.purpose)}</div>
+      </div>
+      ${sopList("Equipment", sop.equipment)}
+      ${sop.safety.length ? `<div class="install-tip" style="margin-top:16px"><b>Safety</b><ul class="sop-list" style="margin-top:6px">${sop.safety.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
+      <div class="row section-row"><h2 class="section grow">Steps</h2>${done ? `<button class="btn text" data-action="reset-ticks" data-id="${esc(sop.id)}">Clear ${done}/${sop.steps.length}</button>` : ""}</div>
+      <ol class="sop-steps">${sop.steps.map((st, n) => `
+        <li class="${ticks.includes(n) ? "done" : ""}">
+          <label><input type="checkbox" ${ticks.includes(n) ? "checked" : ""} data-action="tick-step" data-id="${esc(sop.id)}" data-value="${n}"><span>${esc(st)}</span></label>
+        </li>`).join("")}</ol>
+      ${sop.pass.length ? `<h2 class="section">Pass criteria</h2><div class="card pass-card"><ul class="sop-list">${sop.pass.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
+      ${sopList("Record", sop.record)}
+      ${sopList("Notes", sop.notes)}
+      <h2 class="section">Sources</h2>
+      <ul class="sop-list small">${sop.sources.map(([path, label]) => `<li>${binderLink(path, label)}</li>`).join("")}</ul>
+      <div class="row" style="margin-top:24px;gap:12px">
+        ${prev ? `<a class="btn outline grow" href="#/sop/${esc(prev.id)}" style="justify-content:flex-start">‹ ${esc(prev.title)}</a>` : `<span class="grow"></span>`}
+        ${next ? `<a class="btn outline grow" href="#/sop/${esc(next.id)}" style="justify-content:flex-end;text-align:right">${esc(next.title)} ›</a>` : `<span class="grow"></span>`}
+      </div>
+    </main>`;
+}
+
 // ── Router ────────────────────────────────────────────────────────────────
 
 const TABS = [
@@ -1219,6 +1291,8 @@ function render() {
     tests: () => testsScreen(),
     test: () => (sub === "edit" ? testEditScreen(id) : testScreen(id)),
     procedure: () => procedureScreen(),
+    sops: () => sopIndexScreen(),
+    sop: () => sopScreen(id),
     profile: () => (sub === "edit" ? profileEditScreen(id) : profileScreen(id)),
   };
   const screen = screens[section] || screens.home;
@@ -1247,7 +1321,7 @@ function goBack() {
     return;
   }
   const { section, id, sub } = route();
-  const parent = { goal: "goals", report: "reports", profile: "team", test: "tests", procedure: "tests" }[section] || "home";
+  const parent = { goal: "goals", report: "reports", profile: "team", test: "tests", procedure: "sops", sops: "tests", sop: "sops" }[section] || "home";
   location.hash = sub && id !== "new" ? `#/${section}/${id}` : `#/${parent}`;
 }
 
@@ -1353,6 +1427,17 @@ document.addEventListener("click", (event) => {
       });
       break;
     }
+    case "tick-step": {
+      const n = Number(value);
+      const list = ui.sopTicks[id] || [];
+      ui.sopTicks[id] = list.includes(n) ? list.filter((x) => x !== n) : [...list, n];
+      refresh();
+      break;
+    }
+    case "reset-ticks":
+      ui.sopTicks[id] = [];
+      refresh();
+      break;
     case "delete-atc":
       store.update(() => {
         const t = store.test(el.dataset.test);
