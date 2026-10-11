@@ -1,6 +1,6 @@
 // Offline support: serve the app from cache, refresh the cache in the background.
 // Bump VERSION whenever the app shell changes so old caches are cleared.
-const VERSION = "mmi-app-v2";
+const VERSION = "mmi-app-v3";
 const SHELL = [
   "./",
   "./index.html",
