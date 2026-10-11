@@ -36,8 +36,8 @@
 - [ ] Theoretical evaluation record (R07630001) filed → `Documents/`
 - [ ] Practical evaluation confirmation letter filed → `Documents/`
 - [ ] Updated Schedule A filed → `Documents/`
-- [ ] Measurement Canada Field Inspection Manual (relevant sections) → `Study_Materials/`
-- [ ] Relevant device inspection directives (V-09, V-16) → `Codebooks/`
+- [x] Measurement Canada Field Inspection Manual (relevant sections) → [course binder](../NTTP_Courses/Bulk_and_Retail_Petroleum/Study_Materials/README.md). Check against MC's current rev. 3 (2025-10-10)
+- [x] Relevant bulletins (V-03, V-09, V-16, V-17, V-18, V-19, V-23, V-24) → [binder Module 7](../NTTP_Courses/Bulk_and_Retail_Petroleum/Study_Materials/Course_Binder/09_Module_07_Bulletins/)
 - [x] VCF Table — Diesel, density 840 kg/m³ → `Codebooks/VCF_Diesel_840.pdf`
 - [x] VCF Table — Gasoline, density 730 kg/m³ → `Codebooks/VCF_Gasoline_730.pdf`
 - [ ] Field observation notes from evaluation day → `Field_Notes/`

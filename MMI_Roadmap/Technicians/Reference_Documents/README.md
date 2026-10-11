@@ -5,14 +5,16 @@ Shared legislation, regulations, and Measurement Canada directives that apply ac
 ## Documents to Collect
 
 ### Federal Legislation
-- [ ] Weights and Measures Act (current)
+- [x] Weights and Measures Act (current) → [binder Module 2](../NTTP_Courses/Bulk_and_Retail_Petroleum/Study_Materials/Course_Binder/04_Module_02_Act/)
 - [ ] Weights and Measures Regulations (CRC, c. 1605)
 - [ ] Electricity and Gas Inspection Act (if pursuing gas/electricity meters)
 
 ### Measurement Canada Directives
-- [ ] V-09 — Inspection of gasoline and diesel fuel dispensers and refuellers
-- [ ] V-16 — Classification of liquids for approval of liquid meters
-- [ ] Field Inspection Manual — Volumetric Measuring Devices, Part 2 Section 1
+- [x] V-09 — Inspection of gasoline and diesel fuel dispensers and refuellers
+- [x] V-16 — Classification of liquids for approval of liquid meters
+- [x] Field Inspection Manual — Volumetric Measuring Devices, Part 2 Section 1
+
+> V-09, V-16, the other bulletins, the FIM sections, the STPs and the Act are now in the [NTTP Bulk & Retail course binder](../NTTP_Courses/Bulk_and_Retail_Petroleum/Study_Materials/README.md).
 - [ ] Mandatory Examination Frequencies by Sector and Device Type
 - [ ] NTTP Course Policy document
 
