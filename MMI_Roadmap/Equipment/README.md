@@ -106,9 +106,9 @@ Both are recognized. Different form factors, different workdays.
 
 **One recognized 20 L is enough to start.** Reasons to add a second, in order of seriousness:
 
-1. **Business continuity.** A local standard must be periodically re-verified by MC, and MMI cannot certify anything while it is away. A dent also takes it out of service — a dent changes the volume. One measure is a single point of failure for all inspection revenue. Buy the second *before* it is needed, not after.
+1. **Business continuity.** A local standard must be periodically re-verified by MC (20 L test measures yearly, 20 L and 250 L provers every four years: [FIM Part 2 §1](../Technicians/NTTP_Courses/Bulk_and_Retail_Petroleum/Study_Materials/Course_Binder/11_Module_09_Inspection_Procedures/Field%20Inspection%20Manual%20VMD_Part2Section1.pdf)), and MMI cannot certify anything while it is away. A dent also takes it out of service — a dent changes the volume. One measure is a single point of failure for all inspection revenue. Buy the second *before* it is needed, not after.
 2. **DEF, if ever in scope.** DEF equipment must be dedicated and never shared with other fluids. Non-negotiable separation.
-3. **Throughput.** Standard procedure allows a 30-second drain period after cessation of flow, on top of pour-back and repositioning. A second measure lets one drain while the other fills.
+3. **Throughput.** Each emptying needs a drain period of 20 seconds for a 20 L measure (10 s for 5 L) after the stream breaks to drips, unless the measure's certificate says otherwise ([STP-22](../Technicians/NTTP_Courses/Bulk_and_Retail_Petroleum/Study_Materials/Course_Binder/12_Module_10_Standard_Test_Procedures/STP-22.md)). That's on top of pour-back and repositioning. A second measure lets one drain while the other fills.
 
 Gasoline-vs-diesel cross-contamination is **not** a documented reason for separate measures — proper draining handles it.
 
@@ -162,7 +162,8 @@ Also required alongside the vehicle:
 ### Purchase
 - [ ] 20 L recognized measure/prover purchased — **funnel model number on the PO if E-VRTM**
 - [ ] 5 L test measure (only if low-flow devices are on Schedule A)
-- [ ] Certified thermometer
+- [ ] Certified electronic thermometer, 0.1 °C resolution. It needs an **ice-point check at least every 30 days** to stay valid (V-24); see [TE-LP-001](../Technicians/NTTP_Courses/Bulk_and_Retail_Petroleum/Study_Materials/Course_Binder/10_Module_08_Temperature/)
+- [ ] Ice-point bath kit (distilled water, ice trays, blender, insulated flask) for those checks
 - [ ] Hydrometer (density for VCF)
 - [ ] Security seals and lead-wire crimper
 - [ ] Certificate printer / field laptop
@@ -170,7 +171,8 @@ Also required alongside the vehicle:
 ### After purchase
 - [ ] Unit submitted to MC for verification and designation as a local standard
 - [ ] Designation certificate filed → `Documents/`
-- [ ] Re-verification interval diarized
+- [ ] Re-verification interval diarized (yearly for a 20 L test measure, every 4 years for a prover)
+- [ ] Prover's cubical expansion coefficient (CCE) noted from the nameplate. Every reading needs a shell-temperature correction (V-17, STP-23), and the app needs the CCE for it
 - [ ] Equipment added to business insurance schedule
 
 ---

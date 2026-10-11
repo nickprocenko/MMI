@@ -27,11 +27,11 @@
 - [ ] Practical evaluation confirmation letter filed → `Documents/`
 - [ ] Certificate / Schedule A listing filed → `Documents/`
 - [ ] Weights and Measures Act & Regulations → `Reference_Documents/`
-- [ ] Measurement Canada directives V-09, V-16 → `Codebooks/`
+- [x] Measurement Canada bulletins incl. V-09, V-16 → [`Study_Materials/Course_Binder/09_Module_07_Bulletins/`](Study_Materials/Course_Binder/09_Module_07_Bulletins/)
 - [x] VCF Table — Diesel, density 840 kg/m³ → `Codebooks/VCF_Diesel_840.pdf`
 - [x] VCF Table — Gasoline, density 730 kg/m³ → `Codebooks/VCF_Gasoline_730.pdf`
-- [ ] Field Inspection Manual — Volumetric Measuring Devices Part 2 → `Study_Materials/`
-- [ ] Course study notes → `Study_Materials/`
+- [x] Field Inspection Manual — Volumetric Measuring Devices Part 2 → [`Study_Materials/Course_Binder/11_Module_09_Inspection_Procedures/`](Study_Materials/Course_Binder/11_Module_09_Inspection_Procedures/) (2012 rev. 2; get MC's 2025 rev. 3)
+- [x] Course binder (12 modules) and analysis → [`Study_Materials/`](Study_Materials/README.md)
 
 ## Business Milestones
 
