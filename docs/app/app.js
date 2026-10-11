@@ -126,7 +126,7 @@ const store = {
       data = null;
     }
     if (!data || !Array.isArray(data.members)) {
-      data = { schemaVersion: 1, activeMemberId: null, members: SEED_MEMBERS, goals: SEED_GOALS, reports: [] };
+      data = { schemaVersion: 1, activeMemberId: null, members: SEED_MEMBERS, goals: SEED_GOALS, reports: [], tests: [] };
     }
     // Make sure every built-in member exists, e.g. after an update adds one.
     for (const seed of SEED_MEMBERS) {
@@ -134,6 +134,7 @@ const store = {
     }
     data.goals ||= [];
     data.reports ||= [];
+    data.tests ||= [];
     this.data = data;
   },
 
@@ -153,6 +154,7 @@ const store = {
   member(id) { return this.data.members.find((m) => m.id === id); },
   goal(id) { return this.data.goals.find((g) => g.id === id); },
   report(id) { return this.data.reports.find((r) => r.id === id); },
+  test(id) { return this.data.tests.find((t) => t.id === id); },
   me() { return this.member(this.data.activeMemberId); },
 };
 
@@ -265,6 +267,8 @@ const ICONS = {
   verified: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z",
   download: "M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z",
   upload: "M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z",
+  gauge: "M20.38 8.57l-1.23 1.85a8 8 0 0 1-.22 7.58H5.07A8 8 0 0 1 15.58 6.85l1.85-1.23A10 10 0 0 0 3.35 19a2 2 0 0 0 1.72 1h13.85a2 2 0 0 0 1.74-1 10 10 0 0 0-.27-10.44zm-9.79 6.84a2 2 0 0 0 2.83 0l5.66-8.49-8.49 5.66a2 2 0 0 0 0 2.83z",
+  book: "M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z",
 };
 
 function icon(name) {
@@ -397,7 +401,7 @@ function homeScreen() {
     </main>`;
 }
 
-const ui = { goalScope: "MINE", showCompleted: true, reportAuthor: null };
+const ui = { goalScope: "MINE", showCompleted: true, reportAuthor: null, testScope: "MINE", draftPhase: "AS_FOUND", draftFlow: "NORMAL" };
 
 function goalsScreen() {
   const me = store.me();
@@ -532,12 +536,13 @@ function teamScreen() {
       ${members.map((m) => {
         const open = goals.filter((g) => isAssignedTo(g, m.id) && g.status !== "COMPLETE").length;
         const count = reports.filter((r) => r.authorId === m.id).length;
+        const tests = store.data.tests.filter((t) => t.technicianId === m.id).length;
         return `<a class="card row" style="gap:16px" href="#/profile/${esc(m.id)}">
           ${avatar(m, 52)}
           <span class="grow">
             <span class="row"><span class="card-title">${esc(m.name)}</span>${m.id === me.id ? `<span class="tag">You</span>` : ""}</span>
             <span style="display:block">${esc(m.title)}</span>
-            <span class="small muted">${open} open goals · ${count} reports</span>
+            <span class="small muted">${open} open goals · ${count} reports · ${tests} tests</span>
           </span>
         </a>`;
       }).join("")}
@@ -605,11 +610,400 @@ function profileEditScreen(id) {
     </main>`;
 }
 
+// ── Calibration tests ─────────────────────────────────────────────────────
+// Dispenser accuracy tests. Rules and sources are summarised on the Procedure screen.
+
+const PRODUCTS = { GASOLINE_730: "Gasoline (730 kg/m³)", DIESEL_840: "Diesel (840 kg/m³)", OTHER: "Other product" };
+const FLOWS = { NORMAL: "Normal flow", SLOW: "Slow flow" };
+const PHASES = { AS_FOUND: "As found", AS_LEFT: "As left" };
+const CONDITIONS = { IN_SERVICE: "In-service (field)", CONTROLLED: "Acceptance (controlled)" };
+const VERDICTS = { PASS: "Pass", FAIL: "Fail", INCOMPLETE: "Incomplete" };
+
+/** Limits of error in mL by known test quantity: [acceptance, in-service]. Weights and Measures Regulations. */
+const LOE_ML = { 5: [30, 60], 10: [40, 80], 20: [50, 100], 50: [100, 200] };
+/** s. 263: the spread of three consecutive results must not exceed 2/5 of the limit of error. */
+const REPEATABILITY_FRACTION = 0.4;
+
+function lookupVcf(product, temp) {
+  const table = VCF_TABLES[product];
+  if (!table || !Number.isFinite(temp)) return null;
+  const v = table.values[Math.round(temp * 10) - table.min];
+  return v ? v / 10000 : null;
+}
+
+function limitMl(test) {
+  const row = LOE_ML[test.measureVolume] || LOE_ML[20];
+  return test.conditions === "CONTROLLED" ? row[0] : row[1];
+}
+
+/** Error = dispenser indicated − delivered (corrected to 15 °C for ATC dispensers). + means over-registration. */
+function computeDraft(test, d) {
+  let vcf = 1;
+  if (test.atc) {
+    vcf = d.vcf ?? lookupVcf(test.product, d.temp);
+    if (!vcf) return { vcf: null, errorMl: null, pass: null };
+  }
+  const delivered = d.measure * vcf;
+  const errorMl = Math.round((d.indicated - delivered) * 10000) / 10;
+  return { vcf, delivered, errorMl, pass: Math.abs(errorMl) <= limitMl(test) + 1e-9 };
+}
+
+function groupSummary(test, phase, flow) {
+  const drafts = test.drafts.filter((d) => d.phase === phase && d.flow === flow);
+  const errors = drafts.map((d) => computeDraft(test, d).errorMl).filter((e) => e !== null);
+  if (!drafts.length) return null;
+  const limit = limitMl(test);
+  const lastThree = errors.slice(-3);
+  const spread = lastThree.length === 3 ? Math.max(...lastThree) - Math.min(...lastThree) : null;
+  const repeatOk = spread === null ? null : spread <= limit * REPEATABILITY_FRACTION + 1e-9;
+  const allPass = errors.length === drafts.length && errors.every((e) => Math.abs(e) <= limit + 1e-9);
+  const mean = errors.length ? errors.reduce((a, b) => a + b, 0) / errors.length : null;
+  return { count: drafts.length, mean, spread, repeatOk, allPass, missing: drafts.length - errors.length };
+}
+
+function phaseVerdict(test, phase) {
+  if (!test.drafts.some((d) => d.phase === phase)) return null;
+  const groups = Object.keys(FLOWS).map((f) => groupSummary(test, phase, f)).filter(Boolean);
+  if (groups.some((g) => g.missing > 0)) return "INCOMPLETE";
+  if (groups.some((g) => !g.allPass || g.repeatOk === false)) return "FAIL";
+  if (!groupSummary(test, phase, "NORMAL") || !groupSummary(test, phase, "SLOW")) return "INCOMPLETE";
+  return "PASS";
+}
+
+/** The final result is the as-left result when the dispenser was adjusted, otherwise as-found. */
+function testVerdict(test) {
+  return phaseVerdict(test, "AS_LEFT") || phaseVerdict(test, "AS_FOUND") || "INCOMPLETE";
+}
+
+function verdictBadge(v) {
+  return `<span class="verdict ${esc(v)}">${esc(VERDICTS[v])}</span>`;
+}
+
+function fmtErr(ml) {
+  if (ml === null || ml === undefined) return "—";
+  return `${ml > 0 ? "+" : ""}${Number.isInteger(ml) ? ml : ml.toFixed(1)} mL`;
+}
+
+function testCard(t) {
+  const tech = store.member(t.technicianId);
+  const title = [t.site || "Unnamed site", t.nozzle ? `Pump ${t.nozzle}` : null].filter(Boolean).join(" · ");
+  const meta = [t.date, PRODUCTS[t.product], `${t.drafts.length} drafts`].filter(Boolean).join(" · ");
+  return `<a class="card row" style="gap:12px" href="#/test/${esc(t.id)}">
+    ${tech ? avatar(tech, 36) : ""}
+    <span class="grow" style="min-width:0">
+      <span class="card-title" style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(title)}</span>
+      <span class="small muted">${esc(meta)}</span>
+    </span>
+    ${verdictBadge(testVerdict(t))}
+  </a>`;
+}
+
+function testsScreen() {
+  const me = store.me();
+  const tests = store.data.tests
+    .filter((t) => ui.testScope === "ALL" || t.technicianId === me.id)
+    .sort((a, b) => b.date.localeCompare(a.date) || (b.createdAt || 0) - (a.createdAt || 0));
+  return `${mainBar("Calibration tests")}
+    <main class="page">
+      <a class="card row" style="gap:12px" href="#/procedure">
+        <span style="color:var(--primary)">${icon("book")}</span>
+        <span class="grow"><span class="card-title" style="display:block">Test procedure &amp; limits</span>
+        <span class="small muted">Steps, limits of error, VCF tables and sources</span></span>
+        ${icon("chevron")}
+      </a>
+      <div class="row wrap" style="margin-top:14px">
+        <div class="chips grow">
+          ${chip("Mine", ui.testScope !== "ALL", `data-action="test-scope" data-value="MINE"`)}
+          ${chip("Everyone", ui.testScope === "ALL", `data-action="test-scope" data-value="ALL"`)}
+        </div>
+        ${store.data.tests.length ? `<button class="btn text" data-action="export-tests">${icon("download")} CSV</button>` : ""}
+      </div>
+      <div class="stack" style="margin-top:14px">${tests.map(testCard).join("") || empty("No tests yet. Tap New test to record a dispenser calibration.")}</div>
+    </main>
+    <a class="fab" href="#/test/new/edit">${icon("add")} New test</a>`;
+}
+
+function testEditScreen(id) {
+  const existing = store.test(id);
+  const t = existing || {
+    date: today(), site: "", address: "", client: "", nozzle: "", dispenserId: "", makeModel: "",
+    product: "GASOLINE_730", atc: true, maxFlow: "", minFlow: "", measureVolume: 20, measureId: "",
+    thermometerId: "", conditions: "IN_SERVICE", sealsRemoved: "", sealsApplied: "", notes: "",
+  };
+  // Pre-fill equipment from this technician's last test to save typing in the field.
+  if (!existing) {
+    const last = store.data.tests.filter((x) => x.technicianId === store.data.activeMemberId).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))[0];
+    if (last) Object.assign(t, { measureId: last.measureId, thermometerId: last.thermometerId, measureVolume: last.measureVolume, client: last.client, site: last.site, address: last.address });
+  }
+  const input = (label, name, value, extra = "") =>
+    `<label class="field"><span>${label}</span><input name="${name}" value="${esc(value ?? "")}" ${extra}></label>`;
+  return `${detailBar(existing ? "Edit test" : "New test", `<button class="icon-btn" form="test-form" type="submit" aria-label="Save">${icon("check")}</button>`)}
+    <main class="page no-tabs">
+      <form id="test-form" data-form="test" data-id="${esc(existing ? existing.id : "")}" novalidate>
+        <h2 class="section" style="margin-top:4px">Site</h2>
+        <div class="field-row">
+          ${input("Date", "date", t.date, 'type="date"')}
+          ${input("Client", "client", t.client)}
+        </div>
+        ${input("Site name", "site", t.site, 'placeholder="e.g. Esso — Main St"')}
+        ${input("Address", "address", t.address)}
+
+        <h2 class="section">Dispenser</h2>
+        <div class="field-row">
+          ${input("Pump / nozzle", "nozzle", t.nozzle, 'placeholder="e.g. 3 — Regular"')}
+          ${input("Serial / unit ID", "dispenserId", t.dispenserId)}
+        </div>
+        ${input("Make / model", "makeModel", t.makeModel)}
+        <div class="field"><span>Product</span>
+          <div class="chips" data-single="product">${Object.entries(PRODUCTS).map(([k, v]) => chip(v, t.product === k, `data-value="${k}"`)).join("")}</div>
+        </div>
+        <div class="field"><span>Temperature compensated (volume corrected to 15 °C)?</span>
+          <div class="chips" data-single="atc">${chip("Yes — ATC", !!t.atc, 'data-value="yes"')}${chip("No", !t.atc, 'data-value="no"')}</div>
+        </div>
+        <div class="field-row">
+          ${input("Max approved flow (L/min)", "maxFlow", t.maxFlow, 'inputmode="decimal"')}
+          ${input("Min approved flow (L/min)", "minFlow", t.minFlow, 'inputmode="decimal"')}
+        </div>
+
+        <h2 class="section">Test equipment</h2>
+        <div class="field"><span>Test measure / prover size</span>
+          <div class="chips" data-single="measureVolume">${[5, 20, 50].map((v) => chip(`${v} L`, Number(t.measureVolume) === v, `data-value="${v}"`)).join("")}</div>
+          <span class="small muted">≤ 20 L/min: 5 L · ≤ 90 L/min: 20 L · high-speed: larger prover.</span>
+        </div>
+        <div class="field-row">
+          ${input("Measure ID / serial", "measureId", t.measureId)}
+          ${input("Thermometer ID", "thermometerId", t.thermometerId)}
+        </div>
+        <div class="field"><span>Test conditions</span>
+          <div class="chips" data-single="conditions">${Object.entries(CONDITIONS).map(([k, v]) => chip(v, t.conditions === k, `data-value="${k}"`)).join("")}</div>
+        </div>
+
+        <h2 class="section">Seals &amp; notes</h2>
+        <div class="field-row">
+          ${input("Seals removed", "sealsRemoved", t.sealsRemoved)}
+          ${input("Seals applied", "sealsApplied", t.sealsApplied)}
+        </div>
+        <label class="field"><span>Notes</span><textarea name="notes" placeholder="Condition of nozzle, hose, display, labels, adjustments made…">${esc(t.notes)}</textarea></label>
+        <button class="btn" type="submit" style="width:100%">${existing ? "Save test" : "Save and start drafts"}</button>
+      </form>
+    </main>`;
+}
+
+function draftRow(test, d, n) {
+  const r = computeDraft(test, d);
+  const state = r.pass === null ? "INCOMPLETE" : r.pass ? "PASS" : "FAIL";
+  const detail = [
+    `Shown ${d.indicated.toFixed(3)} L`,
+    `measure ${d.measure.toFixed(3)} L`,
+    Number.isFinite(d.temp) ? `${d.temp.toFixed(1)} °C` : null,
+    test.atc ? (r.vcf ? `VCF ${r.vcf.toFixed(4)}` : "no VCF") : null,
+  ].filter(Boolean).join(" · ");
+  return `<div class="draft">
+    <span class="draft-n">${n}</span>
+    <span class="grow" style="min-width:0">
+      <span class="small"><b>${esc(PHASES[d.phase])}</b> · ${esc(FLOWS[d.flow])}</span>
+      <span class="small muted" style="display:block">${esc(detail)}</span>
+    </span>
+    <span class="err ${state}">${esc(fmtErr(r.errorMl))}</span>
+    <button class="icon-btn" data-action="delete-draft" data-test="${esc(test.id)}" data-id="${esc(d.id)}" aria-label="Delete draft ${n}">${icon("close")}</button>
+  </div>`;
+}
+
+function summaryTable(test) {
+  const limit = limitMl(test);
+  const rows = [];
+  for (const phase of Object.keys(PHASES)) {
+    for (const flow of Object.keys(FLOWS)) {
+      const g = groupSummary(test, phase, flow);
+      if (!g) continue;
+      const repeat = g.spread === null ? `needs 3 drafts` : `${g.spread.toFixed(1)} mL ${g.repeatOk ? "✓" : "✗"}`;
+      rows.push(`<tr><td>${esc(PHASES[phase])}<br><span class="muted">${esc(FLOWS[flow])}</span></td>
+        <td>${g.count}</td><td>${esc(fmtErr(g.mean === null ? null : Math.round(g.mean * 10) / 10))}</td>
+        <td>${g.allPass ? "✓" : "✗"}</td><td>${esc(repeat)}</td></tr>`);
+    }
+  }
+  if (!rows.length) return "";
+  return `<div class="table-wrap"><table class="summary">
+    <thead><tr><th>Test</th><th>Drafts</th><th>Avg error</th><th>≤ ${limit} mL</th><th>Spread (≤ ${(limit * REPEATABILITY_FRACTION).toFixed(0)})</th></tr></thead>
+    <tbody>${rows.join("")}</tbody></table></div>`;
+}
+
+function testScreen(id) {
+  const t = store.test(id);
+  if (!t) return `${detailBar("Test")}<main class="page no-tabs">${empty("This test no longer exists.")}</main>`;
+  const tech = store.member(t.technicianId);
+  const limit = limitMl(t);
+  const verdict = testVerdict(t);
+  const found = phaseVerdict(t, "AS_FOUND");
+  const left = phaseVerdict(t, "AS_LEFT");
+  const nominal = Number(t.measureVolume).toFixed(3);
+  const needsVcf = t.atc && !VCF_TABLES[t.product];
+  const slowRate = Number(t.minFlow) > 0 ? ` (≈ ${formatHours(Number(t.minFlow) + 5)} L/min)` : "";
+  const info = [
+    ["Date", t.date], ["Client", t.client], ["Address", t.address], ["Serial / unit", t.dispenserId], ["Make / model", t.makeModel],
+    ["Product", PRODUCTS[t.product]], ["Temperature compensated", t.atc ? "Yes — corrected to 15 °C" : "No"],
+    ["Flow (L/min)", [t.minFlow && `min ${t.minFlow}`, t.maxFlow && `max ${t.maxFlow}`].filter(Boolean).join(" · ")],
+    ["Measure", [`${t.measureVolume} L`, t.measureId].filter(Boolean).join(" · ")], ["Thermometer", t.thermometerId],
+    ["Conditions", CONDITIONS[t.conditions]], ["Seals removed", t.sealsRemoved], ["Seals applied", t.sealsApplied],
+  ].filter(([, v]) => v);
+  return `${detailBar("Test", `
+      <a class="icon-btn" href="#/test/${esc(t.id)}/edit" aria-label="Edit">${icon("edit")}</a>
+      <button class="icon-btn" data-action="delete-test" data-id="${esc(t.id)}" aria-label="Delete">${icon("delete")}</button>`)}
+    <main class="page no-tabs">
+      <div class="row">${verdictBadge(verdict)}${found && left ? `<span class="small muted">As found: ${esc(VERDICTS[found])} → as left: ${esc(VERDICTS[left])}</span>` : ""}</div>
+      <h2 style="margin:10px 0 4px;font-size:1.35rem">${esc(t.site || "Unnamed site")}${t.nozzle ? ` · Pump ${esc(t.nozzle)}` : ""}</h2>
+      <div class="row muted small">${tech ? avatar(tech, 24) : ""}<span>${esc(tech?.name || "")}</span></div>
+      <dl class="info">${info.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>
+      ${t.notes ? `<p class="small" style="white-space:pre-wrap">${esc(t.notes)}</p>` : ""}
+
+      <h2 class="section">Summary</h2>
+      <p class="small muted" style="margin-top:0">Limit of error ±${limit} mL on ${t.measureVolume} L (${esc(CONDITIONS[t.conditions].toLowerCase())}). Error = dispenser reading − delivered${t.atc ? " at 15 °C" : ""}; + means the customer gets less than shown.</p>
+      ${summaryTable(t) || empty("No drafts yet.")}
+
+      <h2 class="section">Drafts (${t.drafts.length})</h2>
+      <div>${t.drafts.map((d, i) => draftRow(t, d, i + 1)).join("")}</div>
+
+      <form class="card" style="margin-top:12px" data-form="draft" data-test="${esc(t.id)}" novalidate>
+        <div class="card-title" style="margin-bottom:10px">Add draft</div>
+        <div class="chips" data-single="phase" style="margin-bottom:8px">${Object.entries(PHASES).map(([k, v]) => chip(v, ui.draftPhase === k, `data-value="${k}"`)).join("")}</div>
+        <div class="chips" data-single="flow" style="margin-bottom:12px">${Object.entries(FLOWS).map(([k, v]) => chip(v, ui.draftFlow === k, `data-value="${k}"`)).join("")}</div>
+        <p class="small muted" style="margin:-4px 0 12px">Slow flow = minimum approved flow + 5 L/min${slowRate}.</p>
+        <div class="field-row">
+          <label class="field"><span>Dispenser shows (L)</span><input name="indicated" inputmode="decimal" value="${nominal}"></label>
+          <label class="field"><span>Measure reads (L)</span><input name="measure" inputmode="decimal" placeholder="${nominal}"></label>
+        </div>
+        <div class="field-row">
+          <label class="field"><span>Product temp (°C)</span><input name="temp" inputmode="decimal" placeholder="e.g. 12.4"></label>
+          ${needsVcf ? `<label class="field"><span>VCF</span><input name="vcf" inputmode="decimal" placeholder="e.g. 1.0021"></label>` : `<div></div>`}
+        </div>
+        <p class="small" id="draft-preview" style="margin:0 0 12px;min-height:1.2em"></p>
+        <button class="btn" type="submit" style="width:100%">${icon("add")} Record draft</button>
+      </form>
+    </main>`;
+}
+
+function procedureScreen() {
+  const loeRows = Object.entries(LOE_ML).map(([q, [a, s]]) => `<tr><td>${q} L</td><td>±${a} mL</td><td>±${s} mL</td><td>±${(s * REPEATABILITY_FRACTION).toFixed(0)} mL</td></tr>`).join("");
+  const repo = "https://github.com/nickprocenko/MMI/blob/claude/fuels-safety-courses-gaouwc/MMI_Roadmap";
+  const step = (title, body) => `<li><b>${title}</b><br>${body}</li>`;
+  return `${detailBar("Test procedure")}
+    <main class="page no-tabs procedure">
+      <div class="install-tip"><b>Field summary, not the official procedure.</b> The governing document is Measurement Canada's
+        <i>Field Inspection Manual — Volumetric Measuring Devices, Part 2 Section 1</i> (Types 50 &amp; 51 dispensers, rev. 3, 2025-10-10).
+        Re-read it before each season; MC revises it.</div>
+
+      <h2 class="section">1 · Equipment check</h2>
+      <ul>
+        <li>Test measure or prover on MC's recognized list <b>and</b> designated as a local standard (V-24), within its verification date. Never use a dented measure.</li>
+        <li>Size by dispenser flow: ≤ 20 L/min → 5 L · ≤ 90 L/min → 20 L · high-speed → larger mobile prover.</li>
+        <li>Gasoline: measure/prover must have approved means to minimize vapour loss (e.g. E-VRTM with its funnel).</li>
+        <li>Certified thermometer, resolution ≤ 0.1 °C — designated as a local standard when assessing temperature compensation.</li>
+        <li>Seals and lead-wire crimper.</li>
+      </ul>
+
+      <h2 class="section">2 · Test sequence</h2>
+      <ol>
+        ${step("Record the dispenser", "Site, pump/nozzle, serial, product, approved flow rates, whether it's temperature compensated, and existing seals.")}
+        ${step("Set up", "Level the measure. Wet it down with product and drain before the first recorded draft. Allow the 30-second drain after flow stops each time it's emptied.")}
+        ${step("Normal-flow drafts", "Dispense at full flow and stop at the nominal volume on the register. Read the measure, then take the product temperature in the measure. Record each draft.")}
+        ${step("Slow-flow drafts", "Repeat at the minimum approved flow rate + 5 L/min.")}
+        ${step("Repeatability", "For three consecutive drafts at one flow rate, the highest and lowest errors must be within 2/5 of the limit of error.")}
+        ${step("Adjust if needed", "Record the failing results as <i>As found</i>, adjust, then retest as <i>As left</i>. The app takes the as-left result as final.")}
+        ${step("Seal and record", "Apply seals and record their numbers. If the device can't be brought within limits, follow the FIM for rejection.")}
+      </ol>
+
+      <h2 class="section">3 · Limits of error</h2>
+      <div class="table-wrap"><table class="summary">
+        <thead><tr><th>Test quantity</th><th>Acceptance</th><th>In-service</th><th>Repeatability (in-service)</th></tr></thead>
+        <tbody>${loeRows}</tbody>
+      </table></div>
+      <p class="small muted">Acceptance limits apply only under controlled conditions (e.g. bench tests). Field tests use in-service limits.</p>
+
+      <h2 class="section">4 · Temperature compensation</h2>
+      <p>Temperature-compensated dispensers show volume corrected to 15 °C (bulletin V-19). The app multiplies the measure reading by the volume correction factor (VCF) for the product temperature, from MMI's codebook tables:</p>
+      <ul>
+        <li><a href="${repo}/Technicians/NTTP_Courses/Bulk_and_Retail_Petroleum/Codebooks/VCF_Gasoline_730.pdf">VCF — Gasoline, 730 kg/m³</a> (−30.9 to 30.9 °C)</li>
+        <li><a href="${repo}/Technicians/NTTP_Courses/Bulk_and_Retail_Petroleum/Codebooks/VCF_Diesel_840.pdf">VCF — Diesel, 840 kg/m³</a> (−30.9 to 30.9 °C)</li>
+      </ul>
+      <p class="small muted">For other products or temperatures outside the tables, enter the VCF by hand.</p>
+      <h3 style="font-size:1rem;margin:16px 0 6px">VCF lookup</h3>
+      <form class="row wrap" data-form="vcf-lookup" style="align-items:flex-end">
+        <label class="field" style="margin:0;flex:1;min-width:120px"><span>Temperature (°C)</span><input name="temp" inputmode="decimal" placeholder="e.g. 8.6"></label>
+        <button class="btn tonal" type="submit">Look up</button>
+      </form>
+      <p id="vcf-result" class="small" style="min-height:1.2em"></p>
+
+      <h2 class="section">Sources</h2>
+      <ul class="small">
+        <li><a href="https://ised-isde.canada.ca/site/measurement-canada/en/laws-and-requirements/field-inspection-manual-volumetric-measuring-devices/part-2-section-1">MC Field Inspection Manual — Volumetric, Part 2 Section 1 (dispensers)</a></li>
+        <li><a href="https://ised-isde.canada.ca/site/measurement-canada/en/laws-and-requirements/limits-error-refuellers-and-retail-motor-fuel-dispensers">MC — Limits of error for refuellers and retail motor fuel dispensers</a></li>
+        <li><a href="https://laws-lois.justice.gc.ca/eng/regulations/C.R.C.,_c._1605/page-15.html">Weights and Measures Regulations — meters, ss. 261–265</a></li>
+        <li><a href="https://ised-isde.canada.ca/site/measurement-canada/en/node/94">V-19 — Automatic temperature compensation</a></li>
+        <li><a href="https://ised-isde.canada.ca/site/measurement-canada/en/laws-and-requirements/v-24-relevant-local-standards-volume">V-24 — Relevant local standards of volume</a></li>
+        <li><a href="${repo}/Equipment/README.md">MMI Equipment notes</a> · <a href="${repo}/Technicians/Practical_Evaluation/README.md">Practical Evaluation</a></li>
+      </ul>
+    </main>`;
+}
+
+function csvCell(v) {
+  const s = String(v ?? "");
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+function exportTestsCsv() {
+  const header = ["Date", "Technician", "Client", "Site", "Address", "Pump/nozzle", "Serial", "Make/model", "Product", "ATC",
+    "Measure (L)", "Measure ID", "Thermometer ID", "Conditions", "Limit (mL)", "Phase", "Flow", "Draft #",
+    "Indicated (L)", "Measure (L)", "Temp (C)", "VCF", "Error (mL)", "Within limit", "Test result", "Seals removed", "Seals applied", "Notes"];
+  const rows = [header];
+  for (const t of [...store.data.tests].sort((a, b) => a.date.localeCompare(b.date))) {
+    const base = [t.date, store.member(t.technicianId)?.name, t.client, t.site, t.address, t.nozzle, t.dispenserId, t.makeModel,
+      PRODUCTS[t.product], t.atc ? "Yes" : "No", t.measureVolume, t.measureId, t.thermometerId, CONDITIONS[t.conditions], limitMl(t)];
+    const tail = [VERDICTS[testVerdict(t)], t.sealsRemoved, t.sealsApplied, t.notes];
+    if (!t.drafts.length) rows.push([...base, "", "", "", "", "", "", "", "", "", ...tail]);
+    t.drafts.forEach((d, i) => {
+      const r = computeDraft(t, d);
+      rows.push([...base, PHASES[d.phase], FLOWS[d.flow], i + 1, d.indicated, d.measure, d.temp ?? "",
+        r.vcf ?? "", r.errorMl ?? "", r.pass === null ? "" : r.pass ? "Yes" : "No", ...tail]);
+    });
+  }
+  download(`mmi-tests-${today()}.csv`, rows.map((r) => r.map(csvCell).join(",")).join("\r\n"), "text/csv");
+}
+
+function parseNum(text) {
+  const s = String(text ?? "").trim().replace(",", ".");
+  return s === "" ? null : Number(s);
+}
+
+function draftFromForm(form) {
+  const f = Object.fromEntries(new FormData(form).entries());
+  return {
+    phase: chipValue(form, "phase") || "AS_FOUND",
+    flow: chipValue(form, "flow") || "NORMAL",
+    indicated: parseNum(f.indicated),
+    measure: parseNum(f.measure),
+    temp: parseNum(f.temp),
+    vcf: f.vcf !== undefined ? parseNum(f.vcf) : null,
+  };
+}
+
+function updateDraftPreview(form) {
+  const out = document.getElementById("draft-preview");
+  const t = store.test(form.dataset.test);
+  if (!out || !t) return;
+  const d = draftFromForm(form);
+  if (!Number.isFinite(d.indicated) || !Number.isFinite(d.measure)) { out.textContent = ""; return; }
+  if (t.atc && !Number.isFinite(d.temp) && !Number.isFinite(d.vcf)) { out.textContent = "Enter the product temperature."; return; }
+  const r = computeDraft(t, { ...d, vcf: Number.isFinite(d.vcf) ? d.vcf : null });
+  if (r.errorMl === null) { out.textContent = "No VCF for this temperature — enter it by hand."; return; }
+  out.innerHTML = `Error <b>${esc(fmtErr(r.errorMl))}</b> ${r.pass ? "✓ within" : "✗ outside"} ±${limitMl(t)} mL${t.atc ? ` · VCF ${r.vcf.toFixed(4)}` : ""}`;
+}
+
 // ── Router ────────────────────────────────────────────────────────────────
 
 const TABS = [
   ["home", "Home", "home"],
   ["goals", "Goals", "flag"],
+  ["tests", "Tests", "gauge"],
   ["reports", "Reports", "report"],
   ["team", "Team", "team"],
 ];
@@ -635,6 +1029,9 @@ function render() {
     reports: () => reportsScreen(),
     report: () => (sub === "edit" ? reportEditScreen(id) : reportScreen(id)),
     team: () => teamScreen(),
+    tests: () => testsScreen(),
+    test: () => (sub === "edit" ? testEditScreen(id) : testScreen(id)),
+    procedure: () => procedureScreen(),
     profile: () => (sub === "edit" ? profileEditScreen(id) : profileScreen(id)),
   };
   const screen = screens[section] || screens.home;
@@ -663,7 +1060,7 @@ function goBack() {
     return;
   }
   const { section, id, sub } = route();
-  const parent = { goal: "goals", report: "reports", profile: "team" }[section] || "home";
+  const parent = { goal: "goals", report: "reports", profile: "team", test: "tests", procedure: "tests" }[section] || "home";
   location.hash = sub && id !== "new" ? `#/${section}/${id}` : `#/${parent}`;
 }
 
@@ -754,6 +1151,28 @@ document.addEventListener("click", (event) => {
     case "export":
       exportBackup();
       break;
+    case "export-tests":
+      exportTestsCsv();
+      break;
+    case "test-scope":
+      ui.testScope = value;
+      refresh();
+      break;
+    case "delete-test": {
+      const t = store.test(id);
+      confirmDialog("Delete test?", `The test at "${t.site || "this site"}" and its ${t.drafts.length} drafts will be removed.`, "Delete", () => {
+        store.update((d) => { d.tests = d.tests.filter((x) => x.id !== id); });
+        location.replace("#/tests");
+      });
+      break;
+    }
+    case "delete-draft":
+      store.update(() => {
+        const t = store.test(el.dataset.test);
+        t.drafts = t.drafts.filter((d) => d.id !== id);
+      });
+      refresh();
+      break;
     default:
       break;
   }
@@ -837,6 +1256,59 @@ document.addEventListener("submit", (event) => {
     return;
   }
 
+  if (kind === "test") {
+    const date = f.date.trim();
+    if (!isIsoDate(date)) return toast("Enter a valid date.");
+    if (!f.site.trim()) return toast("Enter the site name.");
+    const fields = {
+      date,
+      site: f.site.trim(), address: f.address.trim(), client: f.client.trim(),
+      nozzle: f.nozzle.trim(), dispenserId: f.dispenserId.trim(), makeModel: f.makeModel.trim(),
+      product: chipValue(form, "product") || "GASOLINE_730",
+      atc: chipValue(form, "atc") !== "no",
+      maxFlow: f.maxFlow.trim(), minFlow: f.minFlow.trim(),
+      measureVolume: Number(chipValue(form, "measureVolume") || 20),
+      measureId: f.measureId.trim(), thermometerId: f.thermometerId.trim(),
+      conditions: chipValue(form, "conditions") || "IN_SERVICE",
+      sealsRemoved: f.sealsRemoved.trim(), sealsApplied: f.sealsApplied.trim(), notes: f.notes.trim(),
+    };
+    let id = form.dataset.id;
+    store.update((d) => {
+      if (id) Object.assign(store.test(id), fields);
+      else {
+        id = newId();
+        d.tests.push({ id, technicianId: d.activeMemberId, createdAt: Date.now(), drafts: [], ...fields });
+      }
+    });
+    location.replace(`#/test/${id}`);
+    return;
+  }
+
+  if (kind === "draft") {
+    const t = store.test(form.dataset.test);
+    const d = draftFromForm(form);
+    if (!Number.isFinite(d.indicated) || d.indicated <= 0) return toast("Enter what the dispenser shows.");
+    if (!Number.isFinite(d.measure) || d.measure <= 0) return toast("Enter the measure reading.");
+    if (d.temp !== null && !Number.isFinite(d.temp)) return toast("Temperature must be a number.");
+    if (t.atc && d.temp === null && !Number.isFinite(d.vcf)) return toast("Enter the product temperature.");
+    if (d.vcf !== null && !(d.vcf > 0.9 && d.vcf < 1.1)) return toast("VCF should be close to 1, e.g. 1.0021.");
+    ui.draftPhase = d.phase;
+    ui.draftFlow = d.flow;
+    store.update(() => { t.drafts.push({ id: newId(), ...d, vcf: Number.isFinite(d.vcf) ? d.vcf : null }); });
+    refresh();
+    app.querySelector('[data-form="draft"] [name="measure"]')?.focus();
+    return;
+  }
+
+  if (kind === "vcf-lookup") {
+    const temp = parseNum(f.temp);
+    const out = document.getElementById("vcf-result");
+    if (!Number.isFinite(temp)) { out.textContent = "Enter a temperature."; return; }
+    const g = lookupVcf("GASOLINE_730", temp), d = lookupVcf("DIESEL_840", temp);
+    out.innerHTML = g ? `At ${temp.toFixed(1)} °C — gasoline 730: <b>${g.toFixed(4)}</b> · diesel 840: <b>${d.toFixed(4)}</b>` : "Outside the tables (−30.9 to 30.9 °C).";
+    return;
+  }
+
   if (kind === "profile") {
     const name = f.name.trim();
     if (!name) return toast("Name can't be empty.");
@@ -858,16 +1330,25 @@ document.addEventListener("submit", (event) => {
 
 // ── Backup ────────────────────────────────────────────────────────────────
 
-function exportBackup() {
-  const blob = new Blob([JSON.stringify(store.data, null, 2)], { type: "application/json" });
+function download(filename, text, type) {
+  const blob = new Blob([text], { type });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = `mmi-backup-${today()}.json`;
+  a.download = filename;
   document.body.append(a);
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
+
+function exportBackup() {
+  download(`mmi-backup-${today()}.json`, JSON.stringify(store.data, null, 2), "application/json");
+}
+
+document.addEventListener("input", (event) => {
+  const form = event.target.closest('[data-form="draft"]');
+  if (form) updateDraftPreview(form);
+});
 
 document.addEventListener("change", (event) => {
   const input = event.target;
@@ -885,7 +1366,7 @@ document.addEventListener("change", (event) => {
     }
     confirmDialog("Restore backup?", "This replaces all goals, reports and profiles on this device.", "Restore", () => {
       const active = store.data.activeMemberId;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...data, activeMemberId: active }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...data, tests: Array.isArray(data.tests) ? data.tests : [], activeMemberId: active }));
       store.load();
       refresh();
       toast("Backup restored.");

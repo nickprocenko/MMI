@@ -378,3 +378,70 @@ a.card:active, button.card:active { background: var(--surface-2); }
   color: var(--on-accent-soft);
   font-size: 0.9rem;
 }
+
+/* ── Calibration tests ────────────────────────────── */
+
+.verdict {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  background: var(--surface-2);
+  color: var(--muted);
+}
+.verdict.PASS { background: var(--success); color: #fff; }
+.verdict.FAIL { background: var(--danger); color: #fff; }
+
+.draft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+.draft-n {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.err { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.err.PASS { color: var(--success); }
+.err.FAIL { color: var(--danger); }
+.err.INCOMPLETE { color: var(--muted); }
+
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table.summary {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+table.summary th, table.summary td {
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+table.summary th { color: var(--muted); font-weight: 600; font-size: 0.75rem; }
+
+dl.info {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 14px;
+  margin: 14px 0 0;
+  font-size: 0.9rem;
+}
+dl.info dt { color: var(--muted); }
+dl.info dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+
+.procedure ul, .procedure ol { padding-left: 20px; margin: 0; }
+.procedure li { margin-bottom: 8px; }
+.procedure a { color: var(--primary); text-decoration: underline; }
